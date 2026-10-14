@@ -75,12 +75,12 @@ python3 -m http.server 8000
 
 ## Deploy on GitHub Pages
 
-1. Push `index.html`, `style.css` and `script.js` to the root of the repository.
+1. Push all the files (including `manifest.webmanifest` and the `icons` folder) to the root of the repository.
 2. Go to **Settings → Pages**.
 3. Under **Build and deployment**, choose **Deploy from a branch**, select `main` and `/ (root)`, then save.
 4. After a minute, the app is live at the address shown at the top of the Pages settings.
 
-On iPhone, open the link in Safari and use **Share → Add to Home Screen** for one-tap access.
+On iPhone, open the link in Safari and use **Share → Add to Home Screen**: PocketSci then opens full screen, like a regular app.
 
 ## Project structure
 
@@ -89,6 +89,8 @@ PocketSci/
 ├── index.html   # page layout: display, keypad, history panel
 ├── style.css    # visual design and responsive layout
 ├── script.js    # calculator engine (AOS, formatting, functions) and UI
+├── manifest.webmanifest  # home screen app settings (full screen, name, icons)
+├── icons/       # home screen icons
 └── README.md
 ```
 
