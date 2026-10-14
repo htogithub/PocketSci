@@ -951,8 +951,33 @@
     .split(UB).join('<span class="ub"><span class="sr"> and </span></span>')
     .split(FB).join('<span class="fb"><span class="sr">/</span></span>');
 
+  /* ---------- Appearance & feedback settings (saved on the device) ---------- */
+  const SETTINGS_KEY = 'pocketsci.settings';
+  const THEMES = {
+    retro: { meta: '#2e3a33', accent: '#86cdb9' },
+    dark: { meta: '#1b1c20', accent: '#f0a04b' },
+    amoled: { meta: '#000000', accent: '#b69cff' },
+    minimal: { meta: '#f6f7f8', accent: '#5fb3f9' },
+  };
+  const ACCENTS = [
+    ['Mint', '#86cdb9'], ['Amber', '#f0a04b'], ['Coral', '#ff7a6b'], ['Rose', '#f472b6'],
+    ['Lavender', '#b69cff'], ['Sky', '#5fb3f9'], ['Lime', '#a3d977'], ['Brass', '#d6b44f'],
+  ];
+
+  // Dark or light text, whichever reads better on the accent
+  function inkFor(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => {
+      c /= 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    const L = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    return (L + 0.05) / 0.05 >= 1.05 / (L + 0.05) ? '#111111' : '#ffffff';
+  }
+
   function initUI() {
     const $ = (id) => document.getElementById(id);
+    const root = document.documentElement;
     const calc = $('calc');
     const pad = $('pad');
     const readout = $('readout');
@@ -960,16 +985,147 @@
     const numEl = $('num');
     const expEl = $('exp');
     const prefixEl = $('prefix');
-    const sheet = $('sheet');
     const histBtn = $('histBtn');
     const histList = $('histList');
     const histEmpty = $('histEmpty');
     const histHint = $('histHint');
     const histClear = $('histClear');
     const histClose = $('histClose');
+    const setBtn = $('setBtn');
+    const setClose = $('setClose');
+    const accentsEl = $('accents');
+    const hapticToggle = $('hapticToggle');
+    const sheets = { history: $('history'), settings: $('settings') };
     const keyEls = {};
 
-    // Build the keypad
+    /* ----- Settings ----- */
+    const settings = { theme: 'retro', accent: null, haptics: true };
+    try {
+      const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      if (THEMES[saved.theme]) settings.theme = saved.theme;
+      if (typeof saved.accent === 'string' && /^#[0-9a-f]{6}$/i.test(saved.accent)) settings.accent = saved.accent.toLowerCase();
+      if (typeof saved.haptics === 'boolean') settings.haptics = saved.haptics;
+    } catch (e) { /* private mode or blocked storage: use defaults */ }
+
+    function saveSettings() {
+      try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+          theme: settings.theme,
+          accent: settings.accent,
+          accentInk: settings.accent ? inkFor(settings.accent) : null,
+          haptics: settings.haptics,
+        }));
+      } catch (e) { /* not saved, still applied for this session */ }
+    }
+
+    // Accent swatches: theme default, presets, custom colour
+    const swatches = [];
+    const addSwatch = (id, name, color) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'swatch';
+      b.setAttribute('role', 'radio');
+      b.dataset.acc = id;
+      b.innerHTML = '<span class="dot"></span><span>' + name + '</span>';
+      if (color) b.style.setProperty('--c', color);
+      accentsEl.appendChild(b);
+      swatches.push(b);
+      return b;
+    };
+    const defaultSwatch = addSwatch('default', 'Default');
+    for (const [name, hex] of ACCENTS) addSwatch(hex, name, hex);
+    const custom = document.createElement('label');
+    custom.className = 'swatch';
+    custom.dataset.acc = 'custom';
+    custom.innerHTML = '<span class="dot"></span><span>Custom</span>' +
+      '<input type="color" aria-label="Custom accent color" value="#86cdb9">';
+    accentsEl.appendChild(custom);
+    swatches.push(custom);
+    const customInput = custom.querySelector('input');
+    const rainbow = 'conic-gradient(#ff6b6b, #f0c04b, #a3d977, #5fb3f9, #b69cff, #f472b6, #ff6b6b)';
+
+    function applySettings() {
+      root.dataset.theme = settings.theme;
+      if (settings.accent) {
+        root.style.setProperty('--user-accent', settings.accent);
+        root.style.setProperty('--user-accent-ink', inkFor(settings.accent));
+      } else {
+        root.style.removeProperty('--user-accent');
+        root.style.removeProperty('--user-accent-ink');
+      }
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', THEMES[settings.theme].meta);
+
+      document.querySelectorAll('.theme-opt').forEach((b) => {
+        b.setAttribute('aria-checked', String(b.dataset.themeOpt === settings.theme));
+      });
+      defaultSwatch.style.setProperty('--c', THEMES[settings.theme].accent);
+      const isPreset = settings.accent && ACCENTS.some((a) => a[1] === settings.accent);
+      const selected = !settings.accent ? 'default' : isPreset ? settings.accent : 'custom';
+      for (const sw of swatches) {
+        const on = sw.dataset.acc === selected;
+        sw.classList.toggle('is-sel', on);
+        if (sw.tagName === 'BUTTON') sw.setAttribute('aria-checked', String(on));
+      }
+      custom.style.setProperty('--c', selected === 'custom' ? settings.accent : rainbow);
+      if (selected === 'custom') customInput.value = settings.accent;
+      hapticToggle.checked = settings.haptics;
+    }
+
+    document.querySelectorAll('.theme-opt').forEach((b) => {
+      b.addEventListener('click', () => {
+        settings.theme = b.dataset.themeOpt;
+        applySettings();
+        saveSettings();
+      });
+    });
+    accentsEl.addEventListener('click', (e) => {
+      const b = e.target.closest('button.swatch');
+      if (!b) return;
+      settings.accent = b.dataset.acc === 'default' ? null : b.dataset.acc;
+      applySettings();
+      saveSettings();
+    });
+    customInput.addEventListener('input', () => {
+      settings.accent = customInput.value.toLowerCase();
+      applySettings();
+    });
+    customInput.addEventListener('change', () => {
+      settings.accent = customInput.value.toLowerCase();
+      applySettings();
+      saveSettings();
+    });
+    hapticToggle.addEventListener('change', () => {
+      settings.haptics = hapticToggle.checked;
+      saveSettings();
+    });
+
+    /* ----- Haptics -----
+     * Android and others: Vibration API.
+     * iPhone (iOS 18+): Safari has no Vibration API, but toggling a native
+     * switch control plays the system haptic, so a hidden one is clicked. */
+    let hapticLabel = null;
+    function haptic() {
+      if (!settings.haptics) return;
+      if (typeof navigator.vibrate === 'function') {
+        try { navigator.vibrate(8); } catch (e) { /* ignored */ }
+        return;
+      }
+      if (!hapticLabel) {
+        hapticLabel = document.createElement('label');
+        hapticLabel.setAttribute('aria-hidden', 'true');
+        hapticLabel.style.display = 'none';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.setAttribute('switch', '');
+        input.tabIndex = -1;
+        hapticLabel.appendChild(input);
+        document.body.appendChild(hapticLabel);
+      }
+      hapticLabel.click();
+    }
+
+    /* ----- Keypad ----- */
     for (const k of KEYS) {
       const cell = document.createElement('div');
       cell.className = 'cell' + (k.k === 'op' ? ' cell-op' : '');
@@ -986,7 +1142,7 @@
       sec.innerHTML = k.s || '';
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'key k-' + k.k;
+      btn.className = 'key k-' + k.k + (k.id === 'eq' ? ' k-eq' : '');
       btn.dataset.id = k.id;
       btn.innerHTML = '<span class="lbl">' + k.l + '</span>';
       btn.setAttribute('aria-label', k.n + (k.sn ? '. Second: ' + k.sn : ''));
@@ -997,13 +1153,13 @@
     }
     keyEls.onac = calc.querySelector('[data-id="onac"]');
 
-    // Build the indicator rows
+    /* ----- Display indicators ----- */
     const indEls = [];
     const buildInd = (row, names) => {
       for (const name of names) {
         const span = document.createElement('span');
         span.textContent = name;
-        span.className = 'i-' + name.replace(/[^a-z0-9]/gi, '') ;
+        span.className = 'i-' + name.replace(/[^a-z0-9]/gi, '');
         row.appendChild(span);
         indEls.push([name, span]);
       }
@@ -1053,19 +1209,25 @@
     }
     hooks.onHistory = renderHistory;
 
-    let sheetOpen = false;
-    function setSheet(open) {
-      sheetOpen = open;
-      sheet.classList.toggle('open', open);
-      sheet.inert = !open;
-      pad.inert = open;
-      sheet.setAttribute('aria-hidden', String(!open));
-      histBtn.setAttribute('aria-expanded', String(open));
-      if (open) { renderHistory(); histClose.focus({ preventScroll: true }); }
+    /* ----- Sheets (history / settings) ----- */
+    let openSheet = null;
+    function setSheet(name) {
+      openSheet = name;
+      for (const [n, el] of Object.entries(sheets)) {
+        const open = n === name;
+        el.classList.toggle('open', open);
+        el.inert = !open;
+        el.setAttribute('aria-hidden', String(!open));
+      }
+      pad.inert = !!name;
+      histBtn.setAttribute('aria-expanded', String(name === 'history'));
+      setBtn.setAttribute('aria-expanded', String(name === 'settings'));
+      if (name === 'history') { renderHistory(); histClose.focus({ preventScroll: true }); }
+      if (name === 'settings') setClose.focus({ preventScroll: true });
     }
 
     function hit(id) {
-      if (sheetOpen) setSheet(false);
+      if (openSheet) setSheet(null);
       press(id);
       render();
     }
@@ -1077,30 +1239,46 @@
       setTimeout(() => b.classList.remove('pressed'), 110);
     }
 
-    // Touch / mouse: act on pointerdown for a snappy feel
+    /* ----- Touch / mouse: act on pointerdown for a snappy feel ----- */
+    let pendingHaptic = false;
     calc.addEventListener('pointerdown', (e) => {
       const b = e.target.closest('button.key');
       if (!b || e.button > 0) return;
       e.preventDefault();
       b.classList.add('pressed');
+      if (e.pointerType !== 'mouse') pendingHaptic = true;
       hit(b.dataset.id);
     });
-    const release = () => calc.querySelectorAll('.key.pressed').forEach((b) => b.classList.remove('pressed'));
-    window.addEventListener('pointerup', release);
-    window.addEventListener('pointercancel', release);
+    // The haptic plays on release, where the browser counts the touch as a
+    // user gesture (required on iPhone).
+    window.addEventListener('pointerup', () => {
+      calc.querySelectorAll('.key.pressed').forEach((b) => b.classList.remove('pressed'));
+      if (pendingHaptic) { pendingHaptic = false; haptic(); }
+    });
+    window.addEventListener('pointercancel', () => {
+      calc.querySelectorAll('.key.pressed').forEach((b) => b.classList.remove('pressed'));
+      pendingHaptic = false;
+    });
     // Keyboard activation of a focused key (Enter / Space)
     calc.addEventListener('click', (e) => {
       const b = e.target.closest('button.key');
       if (b && e.detail === 0) hit(b.dataset.id);
     });
 
-    // Physical keyboard
+    /* ----- Physical keyboard ----- */
     let shiftAlone = false;
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Shift') { shiftAlone = true; return; }
       shiftAlone = false;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key === 'Escape' && sheetOpen) { setSheet(false); histBtn.focus(); e.preventDefault(); return; }
+      if (e.key === 'Escape' && openSheet) {
+        const back = openSheet === 'history' ? histBtn : setBtn;
+        setSheet(null);
+        back.focus();
+        e.preventDefault();
+        return;
+      }
+      if (openSheet === 'settings') return; // typing goes to the settings panel
       const active = document.activeElement;
       if ((e.key === 'Enter' || e.key === ' ') && active && active.tagName === 'BUTTON') return;
       const m = KEYMAP[e.key];
@@ -1109,13 +1287,15 @@
       for (const id of [].concat(m)) { flash(id); hit(id); }
     });
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'Shift' && shiftAlone) { flash('2nd'); hit('2nd'); }
+      if (e.key === 'Shift' && shiftAlone && openSheet !== 'settings') { flash('2nd'); hit('2nd'); }
       shiftAlone = false;
     });
 
-    // History panel
-    histBtn.addEventListener('click', () => setSheet(!sheetOpen));
-    histClose.addEventListener('click', () => { setSheet(false); histBtn.focus(); });
+    /* ----- Panels ----- */
+    histBtn.addEventListener('click', () => setSheet(openSheet === 'history' ? null : 'history'));
+    setBtn.addEventListener('click', () => setSheet(openSheet === 'settings' ? null : 'settings'));
+    histClose.addEventListener('click', () => { setSheet(null); histBtn.focus(); });
+    setClose.addEventListener('click', () => { setSheet(null); setBtn.focus(); });
     histClear.addEventListener('click', () => { S.history.length = 0; renderHistory(); });
     histList.addEventListener('click', (e) => {
       const b = e.target.closest('button[data-i]');
@@ -1125,13 +1305,14 @@
       if (S.error) fullClear();
       S.view = null;
       setValue(h.x);
-      setSheet(false);
+      setSheet(null);
       render();
     });
 
     window.addEventListener('resize', fit);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-    setSheet(false);
+    applySettings();
+    setSheet(null);
     renderHistory();
     render();
   }
