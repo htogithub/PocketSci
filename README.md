@@ -75,7 +75,7 @@ python3 -m http.server 8000
 
 ## Deploy on GitHub Pages
 
-1. Push all the files (including `manifest.webmanifest` and the `icons` folder) to the root of the repository.
+1. Push all the files (including `manifest.webmanifest` and the three icons) to the root of the repository.
 2. Go to **Settings → Pages**.
 3. Under **Build and deployment**, choose **Deploy from a branch**, select `main` and `/ (root)`, then save.
 4. After a minute, the app is live at the address shown at the top of the Pages settings.
@@ -90,7 +90,9 @@ PocketSci/
 ├── style.css    # visual design and responsive layout
 ├── script.js    # calculator engine (AOS, formatting, functions) and UI
 ├── manifest.webmanifest  # home screen app settings (full screen, name, icons)
-├── icons/       # home screen icons
+├── apple-touch-icon.png  # iPhone home screen icon
+├── icon-192.png          # app icons
+├── icon-512.png
 └── README.md
 ```
 
