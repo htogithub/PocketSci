@@ -1241,10 +1241,12 @@
 
     /* ----- Touch / mouse: act on pointerdown for a snappy feel ----- */
     let pendingHaptic = false;
+    let lastPointerDown = 0;
     calc.addEventListener('pointerdown', (e) => {
       const b = e.target.closest('button.key');
       if (!b || e.button > 0) return;
       e.preventDefault();
+      lastPointerDown = Date.now();
       b.classList.add('pressed');
       if (e.pointerType !== 'mouse') pendingHaptic = true;
       hit(b.dataset.id);
@@ -1259,10 +1261,13 @@
       calc.querySelectorAll('.key.pressed').forEach((b) => b.classList.remove('pressed'));
       pendingHaptic = false;
     });
-    // Keyboard activation of a focused key (Enter / Space)
+    // Keyboard activation of a focused key (Enter / Space). The click that a
+    // browser sends after a tap is ignored: the tap was already handled.
     calc.addEventListener('click', (e) => {
       const b = e.target.closest('button.key');
-      if (b && e.detail === 0) hit(b.dataset.id);
+      if (!b) return;
+      if (e.pointerType || e.detail > 0 || Date.now() - lastPointerDown < 1000) return;
+      hit(b.dataset.id);
     });
 
     /* ----- Physical keyboard ----- */
@@ -1309,7 +1314,35 @@
       render();
     });
 
-    window.addEventListener('resize', fit);
+    /* ----- No zoom (pinch or double tap), like a native app ----- */
+    const stop = (e) => e.preventDefault();
+    document.addEventListener('gesturestart', stop, { passive: false });
+    document.addEventListener('gesturechange', stop, { passive: false });
+    document.addEventListener('gestureend', stop, { passive: false });
+    document.addEventListener('dblclick', stop, { passive: false });
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 1 || (typeof e.scale === 'number' && e.scale !== 1)) e.preventDefault();
+    }, { passive: false });
+
+    /* ----- Portrait lock: turn the calculator back when the phone is sideways ----- */
+    const landscapePhone = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (pointer: coarse)');
+    function updateOrientation() {
+      let angle = typeof window.orientation === 'number' ? window.orientation
+        : (screen.orientation && typeof screen.orientation.angle === 'number' ? screen.orientation.angle : 90);
+      angle = ((angle % 360) + 360) % 360;
+      const sideways = landscapePhone.matches;
+      root.classList.toggle('rot-ccw', sideways && angle !== 270);
+      root.classList.toggle('rot-cw', sideways && angle === 270);
+      fit();
+    }
+    window.addEventListener('orientationchange', () => setTimeout(updateOrientation, 50));
+    if (screen.orientation && screen.orientation.addEventListener) {
+      screen.orientation.addEventListener('change', updateOrientation);
+    }
+    if (landscapePhone.addEventListener) landscapePhone.addEventListener('change', updateOrientation);
+    window.addEventListener('resize', () => { updateOrientation(); });
+    updateOrientation();
+
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     applySettings();
     setSheet(null);

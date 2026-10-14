@@ -209,7 +209,7 @@ html, body { height: 100%; }
 
 html {
   -webkit-text-size-adjust: 100%;
-  touch-action: manipulation;
+  touch-action: pan-x pan-y; /* no pinch zoom, no double-tap zoom */
   background: var(--page);
   --font-ui: "Barlow Semi Condensed", "Arial Narrow", system-ui, -apple-system, sans-serif;
   --font-lcd: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -585,6 +585,7 @@ button { font: inherit; color: inherit; }
 .hint { padding: 0 16px 8px; font-size: 14px; color: var(--muted); }
 
 .hist-list {
+  touch-action: pan-y;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -639,6 +640,7 @@ button { font: inherit; color: inherit; }
 
 /* Settings */
 .sheet-body {
+  touch-action: pan-y;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -770,6 +772,53 @@ button { font: inherit; color: inherit; }
   .hist-item button:hover { background: var(--tile-bg); }
   .key:hover::after { opacity: 0.45; }
   .key.pressed:hover::after { opacity: 1; }
+}
+
+/* ================= Portrait lock =================
+   iPhone web apps cannot lock their orientation, so when a phone is turned
+   sideways the calculator is turned back the other way: it stays upright
+   relative to the phone, like an app locked in portrait. */
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  .rot-ccw body, .rot-cw body { overflow: hidden; }
+  .rot-ccw .calc, .rot-cw .calc {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vh;
+    width: 100dvh;
+    height: 100vw;
+    height: 100dvw;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+  }
+  /* phone turned to the left: notch on the left, home bar along the bottom */
+  .rot-ccw .calc {
+    transform: translate(-50%, -50%) rotate(-90deg);
+    padding:
+      max(env(safe-area-inset-left), 8px)
+      12px
+      max(env(safe-area-inset-right), 14px)
+      max(env(safe-area-inset-bottom), 12px);
+  }
+  /* phone turned to the right */
+  .rot-cw .calc {
+    transform: translate(-50%, -50%) rotate(90deg);
+    padding:
+      max(env(safe-area-inset-right), 8px)
+      max(env(safe-area-inset-bottom), 12px)
+      max(env(safe-area-inset-left), 14px)
+      12px;
+  }
+  /* sizes based on the screen height use its width instead */
+  :is(.rot-ccw, .rot-cw) .readout { height: clamp(56px, 10dvw, 90px); font-size: min(13dvh, 7dvw, 58px); }
+  :is(.rot-ccw, .rot-cw) .k-fn,
+  :is(.rot-ccw, .rot-cw) .k-clear { font-size: clamp(14px, 2.3dvw, 18px); }
+  :is(.rot-ccw, .rot-cw) .k-num { font-size: clamp(20px, 3.4dvw, 28px); }
+  :is(.rot-ccw, .rot-cw) .k-num[data-id="neg"] { font-size: clamp(16px, 2.6dvw, 21px); }
+  :is(.rot-ccw, .rot-cw) .k-op { font-size: clamp(24px, 4dvw, 34px); }
+  :is(.rot-ccw, .rot-cw) .k-shift { font-size: clamp(15px, 2.4dvw, 19px); }
+  :is(.rot-ccw, .rot-cw) .top .key { font-size: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

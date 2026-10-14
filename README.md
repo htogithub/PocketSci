@@ -17,6 +17,7 @@ A pocket scientific calculator that runs in the browser, built mobile-first for 
 - **Calculation history**: each calculation you finish with = is listed with its expression; tap one to reuse the result
 - **Four themes**: Retro, Dark, AMOLED and Minimal (light), each with a choice of accent color, including a custom one
 - **Haptic feedback** on every key press, which you can turn off
+- **Feels like a native app** once added to the home screen: full screen, no zoom, and it stays upright in portrait when the phone is turned sideways
 - **Physical keyboard support** on desktop
 
 Like the real calculator, memories, statistics and history start fresh every time you open the app. Your appearance and haptic settings are saved on the device.
