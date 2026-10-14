@@ -15,7 +15,7 @@ A pocket scientific calculator that runs in the browser, built mobile-first for 
 - **Probability**: nCr, nPr, x!
 - **Percentages**, **constant operations (K)** and **3 memories** (STO, RCL, SUM, EXC)
 - **Calculation history**: each calculation you finish with = is listed with its expression; tap one to reuse the result
-- **Four themes**: Retro, Dark, AMOLED and Minimal (light), each with a choice of accent color, including a custom one
+- **Four themes**: Retro, Dark, AMOLED and Base, each with a choice of accent color, including a custom one
 - **Haptic feedback** on every key press, which you can turn off
 - **Feels like a native app** once added to the home screen: full screen, no zoom, and it stays upright in portrait when the phone is turned sideways
 - **Physical keyboard support** on desktop
@@ -53,8 +53,8 @@ Keys work exactly as printed: press **2nd** to reach the function written above 
 
 Tap the sliders button next to History to open the settings:
 
-- **Theme**: Retro (sage display and brass keys), Dark, AMOLED (pure black, outlined keys) or Minimal (light and flat).
-- **Accent color**: the color of the 2nd key, the second-function labels and, outside Retro, the operation keys. Pick a preset, keep the theme's default, or choose any color with Custom.
+- **Theme**: Retro (sage display and brass keys), Dark, AMOLED (pure black, outlined keys) or Base (blue number keys, grey operation keys, white labels).
+- **Accent color**: the color of the second-function labels and, in Dark and AMOLED, of the 2nd key and the operation keys (in Retro, of the 2nd key only; in Base, the key colors stay fixed). Pick a preset, keep the theme's default, or choose any color with Custom.
 - **Haptic feedback**: a light tap on each key press. It uses the vibration API on Android; on iPhone it needs iOS 18 or later.
 
 ### Keyboard shortcuts

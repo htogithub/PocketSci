@@ -957,7 +957,7 @@
     retro: { meta: '#2e3a33', accent: '#86cdb9' },
     dark: { meta: '#1b1c20', accent: '#f0a04b' },
     amoled: { meta: '#000000', accent: '#b69cff' },
-    minimal: { meta: '#f6f7f8', accent: '#5fb3f9' },
+    base: { meta: '#15161a', accent: '#147e91' },
   };
   const ACCENTS = [
     ['Mint', '#86cdb9'], ['Amber', '#f0a04b'], ['Coral', '#ff7a6b'], ['Rose', '#f472b6'],
@@ -1002,6 +1002,7 @@
     const settings = { theme: 'retro', accent: null, haptics: true };
     try {
       const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      if (saved.theme === 'minimal') saved.theme = 'base'; // Minimal was replaced by Base
       if (THEMES[saved.theme]) settings.theme = saved.theme;
       if (typeof saved.accent === 'string' && /^#[0-9a-f]{6}$/i.test(saved.accent)) settings.accent = saved.accent.toLowerCase();
       if (typeof saved.haptics === 'boolean') settings.haptics = saved.haptics;

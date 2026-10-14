@@ -21,7 +21,8 @@
     (function () {
       var r = document.documentElement, s = {};
       try { s = JSON.parse(localStorage.getItem('pocketsci.settings') || '{}'); } catch (e) {}
-      var metas = { retro: '#2e3a33', dark: '#1b1c20', amoled: '#000000', minimal: '#f6f7f8' };
+      var metas = { retro: '#2e3a33', dark: '#1b1c20', amoled: '#000000', base: '#15161a' };
+      if (s.theme === 'minimal') s.theme = 'base'; /* Minimal was replaced by Base */
       var t = metas[s.theme] ? s.theme : 'retro';
       r.setAttribute('data-theme', t);
       if (s.accent && s.accentInk) {
@@ -101,9 +102,9 @@
               <span class="pv" style="--pb:#000;--pl:#000;--pk:#0e0e0e;--po:#b69cff;--pe:#3a3a3a"><span class="pv-lcd"></span><span class="pv-keys"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
               <span class="theme-name">AMOLED</span>
             </button>
-            <button type="button" class="theme-opt" role="radio" data-theme-opt="minimal">
-              <span class="pv" style="--pb:#f6f7f8;--pl:#fff;--pk:#fff;--po:#5fb3f9;--pe:#dcdde1"><span class="pv-lcd"></span><span class="pv-keys"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
-              <span class="theme-name">Minimal</span>
+            <button type="button" class="theme-opt" role="radio" data-theme-opt="base">
+              <span class="pv" style="--pb:#15161a;--pl:#0c0d10;--pk:#0270d1;--po:#646665"><span class="pv-lcd"></span><span class="pv-keys"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
+              <span class="theme-name">Base</span>
             </button>
           </div>
 

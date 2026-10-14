@@ -1,4 +1,4 @@
-/* PocketSci — themes: Retro (default), Dark, AMOLED, Minimal.
+/* PocketSci — themes: Retro (default), Dark, AMOLED, Base.
    Every colour comes from the theme variables below; the accent can be
    overridden by the user through --user-accent / --user-accent-ink. */
 
@@ -152,56 +152,59 @@
   color-scheme: dark;
 }
 
-[data-theme="minimal"] {
-  --page: #e8e9ec;
-  --page-bg: #e8e9ec;
-  --body-bg: #f6f7f8;
-  --body-solid: #f6f7f8;
-  --calc-shadow: 0 30px 60px rgba(20, 22, 28, 0.12), 0 0 0 1px rgba(20, 22, 28, 0.06);
-  --ink: #1c1d21;
-  --muted: rgba(28, 29, 33, 0.55);
-  --brand-ink: rgba(28, 29, 33, 0.35);
-  --chip-bg: rgba(20, 22, 28, 0.05);
+[data-theme="base"] {
+  --page: #0b0c0e;
+  --page-bg: #0b0c0e;
+  --body-bg: #15161a;
+  --body-solid: #15161a;
+  --calc-shadow: 0 40px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --ink: #ffffff;
+  --muted: rgba(255, 255, 255, 0.58);
+  --brand-ink: rgba(255, 255, 255, 0.42);
+  --chip-bg: rgba(255, 255, 255, 0.07);
 
-  --accent: var(--user-accent, #5fb3f9);
-  --accent-ink: var(--user-accent-ink, #111111);
-  --accent-text: color-mix(in oklab, var(--accent) 62%, #000);
+  /* the accent only colours the 2nd labels (and chips, focus rings);
+     the key colours of this theme stay fixed */
+  --accent: var(--user-accent, #147e91);
+  --accent-ink: var(--user-accent-ink, #ffffff);
+  --accent-text: var(--accent);
 
-  --lcd-bg: #ffffff;
-  --lcd-ink: #16171a;
-  --lcd-ghost: rgba(22, 23, 26, 0.07);
-  --lcd-shadow: inset 0 0 0 1px #e1e2e6;
+  --lcd-bg: #0c0d10;
+  --lcd-ink: #ffffff;
+  --lcd-ghost: rgba(255, 255, 255, 0.09);
+  --lcd-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
-  --k-weight: 500;
-  --k-fn-bg: #eaebee;
-  --k-fn-ink: #1c1d21;
-  --k-fn-shadow: none;
-  --k-num-bg: #ffffff;
-  --k-num-ink: #16171a;
-  --k-num-shadow: inset 0 0 0 1px #e1e2e6;
-  --k-op-bg: color-mix(in oklab, var(--accent) 18%, #ffffff);
-  --k-op-ink: var(--accent-text);
-  --k-op-shadow: none;
-  --k-eq-bg: var(--accent);
-  --k-eq-ink: var(--accent-ink);
-  --k-eq-shadow: none;
-  --k-shift-bg: color-mix(in oklab, var(--accent) 18%, #ffffff);
-  --k-shift-ink: var(--accent-text);
-  --k-shift-shadow: none;
-  --k-clear-bg: #fbe6e3;
-  --k-clear-ink: #b8392f;
-  --k-clear-shadow: none;
-  --k-press: rgba(0, 0, 0, 0.07);
+  --k-weight: 600;
+  /* keys the same colour as the body get a thin edge so they stay visible */
+  --k-fn-bg: #15161a;
+  --k-fn-ink: #ffffff;
+  --k-fn-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 1px 0 rgba(0, 0, 0, 0.6);
+  --k-num-bg: #0270d1;
+  --k-num-ink: #ffffff;
+  --k-num-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 0 rgba(0, 0, 0, 0.6);
+  --k-op-bg: #646665;
+  --k-op-ink: #ffffff;
+  --k-op-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 0 rgba(0, 0, 0, 0.6);
+  --k-eq-bg: var(--k-op-bg);
+  --k-eq-ink: var(--k-op-ink);
+  --k-eq-shadow: var(--k-op-shadow);
+  --k-shift-bg: #0270d1;
+  --k-shift-ink: #ffffff;
+  --k-shift-shadow: var(--k-num-shadow);
+  --k-clear-bg: #15161a;
+  --k-clear-ink: #ffffff;
+  --k-clear-shadow: var(--k-fn-shadow);
+  --k-press: rgba(255, 255, 255, 0.14);
 
-  --sheet-bg: #ffffff;
-  --sheet-edge: 0 0 0 1px #e1e2e6, 0 -10px 30px rgba(20, 22, 28, 0.06);
-  --tile-bg: #f1f2f4;
-  --line: #ececef;
+  --sheet-bg: #1e1f24;
+  --sheet-edge: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 -10px 30px rgba(0, 0, 0, 0.3);
+  --tile-bg: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.07);
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-/* ================= Base ================= */
+/* ================= Global ================= */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -266,16 +269,6 @@ button { font: inherit; color: inherit; }
     border-radius: 32px;
     box-shadow: var(--calc-shadow);
   }
-}
-
-/* Light theme in the installed iPhone app: the status bar text is always
-   white, so give it a dark strip to sit on. */
-.standalone[data-theme="minimal"] .calc::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: env(safe-area-inset-top, 0px);
-  background: #1c1d21;
 }
 
 /* ================= Top bar ================= */
