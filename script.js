@@ -1329,6 +1329,11 @@
       if (!box || box.scrollHeight <= box.clientHeight) e.preventDefault();
     }, { passive: false });
 
+    // Safety net: if anything ever moves the page, put it straight back.
+    window.addEventListener('scroll', () => {
+      if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
+    }, { passive: true });
+
     /* ----- Portrait lock: turn the calculator back when the phone is sideways ----- */
     const landscapePhone = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (pointer: coarse)');
     function updateOrientation() {

@@ -214,7 +214,6 @@ html {
   height: 100%;
   overscroll-behavior: none;
 }
-body { overflow: hidden; }
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -224,16 +223,12 @@ html {
   --font-lcd: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-/* --app-h is the real screen height, measured by script on the installed
-   iPhone app: there, iOS sizes 100%, 100vh and 100dvh without the status
-   bar, which left an empty strip at the bottom of the screen. */
+/* The body stays in normal flow (no position: fixed): in the installed
+   iPhone app, iOS clips fixed elements to a viewport that is shorter than
+   the screen by the status bar height, which cut off the bottom keys.
+   Scrolling is blocked by script instead (see script.js). */
 body {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  height: var(--app-h, 100dvh);
+  min-height: 100%;
   background: var(--page-bg);
   color: var(--ink);
   font-family: var(--font-ui);

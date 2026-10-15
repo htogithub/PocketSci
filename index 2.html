@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" data-theme="retro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2e3a33">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PocketSci">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="description" content="PocketSci: a pocket scientific calculator for your phone and computer. Fractions, DMS, statistics, 3 memories and the classic AOS order of operations.">
+  <title>PocketSci</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='1.5' width='22' height='29' rx='5' fill='%232e3a33'/%3E%3Crect x='8' y='5' width='16' height='7' rx='1.5' fill='%23b9c4ad'/%3E%3Crect x='8' y='15' width='4' height='3' rx='1' fill='%2386cdb9'/%3E%3Crect x='14' y='15' width='4' height='3' rx='1' fill='%23d4dad0'/%3E%3Crect x='20' y='15' width='4' height='3' rx='1' fill='%23c4a03a'/%3E%3Crect x='8' y='20' width='4' height='3' rx='1' fill='%23d4dad0'/%3E%3Crect x='14' y='20' width='4' height='3' rx='1' fill='%23d4dad0'/%3E%3Crect x='20' y='20' width='4' height='3' rx='1' fill='%23c4a03a'/%3E%3Crect x='8' y='25' width='4' height='3' rx='1' fill='%23d4dad0'/%3E%3Crect x='14' y='25' width='4' height='3' rx='1' fill='%23d4dad0'/%3E%3Crect x='20' y='25' width='4' height='3' rx='1' fill='%23c4a03a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=Barlow+Semi+Condensed:ital,wght@0,500;0,600;0,700;1,700&display=swap">
+  <script>
+    /* Apply saved appearance before the first paint (no colour flash) */
+    (function () {
+      var r = document.documentElement, s = {};
+      try { s = JSON.parse(localStorage.getItem('pocketsci.settings') || '{}'); } catch (e) {}
+      var metas = { retro: '#2e3a33', dark: '#1b1c20', amoled: '#000000', base: '#15161a' };
+      if (s.theme === 'minimal') s.theme = 'base'; /* Minimal was replaced by Base */
+      var t = metas[s.theme] ? s.theme : 'retro';
+      r.setAttribute('data-theme', t);
+      if (s.accent && s.accentInk) {
+        r.style.setProperty('--user-accent', s.accent);
+        r.style.setProperty('--user-accent-ink', s.accentInk);
+      }
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', metas[t]);
+      if (navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) {
+        r.classList.add('standalone');
+      }
+      (window.pocketSciAppHeight = function () {
+      /* Installed iPhone app only: iOS can report a viewport that is shorter
+         than the screen by the status bar height. Use the real screen height. */
+      var r = document.documentElement;
+      var portrait = window.innerHeight > window.innerWidth;
+      var fullWidth = Math.abs(screen.width - window.innerWidth) < 2;
+      r.style.removeProperty('--app-h');
+      var bodyH = document.body ? document.body.getBoundingClientRect().height : 0;
+      var measured = Math.min(window.innerHeight, r.clientHeight || window.innerHeight, bodyH || Infinity);
+      if (navigator.standalone === true && portrait && fullWidth && screen.height - measured > 1) {
+        r.style.setProperty('--app-h', screen.height + 'px');
+      }
+    })();
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css?v=6">
+  <script src="script.js?v=6" defer></script>
+</head>
+<body>
+  <main class="calc" id="calc" aria-label="PocketSci scientific calculator">
+    <header class="top">
+      <div class="top-left">
+        <button class="chip" id="histBtn" type="button" aria-expanded="false" aria-controls="history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/>
+          </svg>
+          <span class="chip-label">History</span>
+        </button>
+        <button class="chip chip-icon" id="setBtn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 6h9M19 6h1M4 12h3M11 12h9M4 18h11M19 18h1"/>
+            <circle cx="16" cy="6" r="2.2"/><circle cx="9" cy="12" r="2.2"/><circle cx="17" cy="18" r="2.2"/>
+          </svg>
+        </button>
+      </div>
+      <span class="brand" aria-hidden="true">PocketSci</span>
+      <button class="key k-clear" type="button" data-id="onac" aria-label="On, all clear" title="On / all clear (resets memories and statistics)">ON/AC</button>
+    </header>
+
+    <section class="lcd" aria-label="Display">
+      <div class="ind" id="indTop" aria-hidden="true"></div>
+      <div class="readout" id="readout" role="status" aria-live="polite">
+        <span class="line" id="line"><span class="prefix" id="prefix"></span><span class="num" id="num"></span><span class="exp" id="exp"></span></span>
+      </div>
+      <div class="ind" id="indBot" aria-hidden="true"></div>
+    </section>
+
+    <div class="padwrap">
+      <div class="pad" id="pad" role="group" aria-label="Keypad"></div>
+
+      <section class="sheet" id="history" aria-label="History" aria-hidden="true">
+        <div class="sheet-head">
+          <h2>History</h2>
+          <button type="button" id="histClear">Clear</button>
+          <button type="button" id="histClose" class="round" aria-label="Close history">✕</button>
+        </div>
+        <p class="hint" id="histHint">Tap a result to reuse it.</p>
+        <ol class="hist-list" id="histList"></ol>
+        <p class="empty" id="histEmpty">No calculations yet. Results appear here when you press =.</p>
+      </section>
+
+      <section class="sheet" id="settings" aria-label="Settings" aria-hidden="true">
+        <div class="sheet-head">
+          <h2>Settings</h2>
+          <button type="button" id="setClose" class="round" aria-label="Close settings">✕</button>
+        </div>
+        <div class="sheet-body">
+          <h3 id="themeLabel">Theme</h3>
+          <div class="themes" role="radiogroup" aria-labelledby="themeLabel">
+            <button type="button" class="theme-opt" role="radio" data-theme-opt="retro">
+              <span class="pv" style="--pb:#2e3a33;--pl:#b9c4ad;--pk:#d4dad0;--po:#c4a03a"><span class="pv-lcd"></span><span class="pv-keys"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
+              <span class="theme-name">Retro</span>
+            </button>
+            <button type="button" class="theme-opt" role="radio" data-theme-opt="dark">
+              <span class="pv" style="--pb:#1b1c20;--pl:#0d0f11;--pk:#45484f;--po:#f0a04b"><span class="pv-lcd"></span><span class="pv-keys"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
+              <span class="theme-name">Dark</span>
+            </button>
+            <button type="button" class="theme-opt" role="radio" data-theme-opt="amoled">
+              <span class="pv" style="--pb:#000;--pl:#000;--pk:#0e0e0e;--po:#b69cff;--pe:#3a3a3a"><span class="pv-lcd"></span><span class="pv-keys"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
+              <span class="theme-name">AMOLED</span>
+            </button>
+            <button type="button" class="theme-opt" role="radio" data-theme-opt="base">
+              <span class="pv" style="--pb:#15161a;--pl:#0c0d10;--pk:#0270d1;--po:#646665"><span class="pv-lcd"></span><span class="pv-keys"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
+              <span class="theme-name">Base</span>
+            </button>
+          </div>
+
+          <h3 id="accentLabel">Accent color</h3>
+          <div class="accents" id="accents" role="radiogroup" aria-labelledby="accentLabel"></div>
+
+          <h3>Feedback</h3>
+          <label class="toggle-row" for="hapticToggle">
+            <span class="toggle-text">
+              <span class="toggle-title">Haptic feedback</span>
+              <span class="toggle-sub">A light tap on each key press. On iPhone, this needs iOS 18 or later.</span>
+            </span>
+            <input type="checkbox" id="hapticToggle" switch>
+          </label>
+
+          <p class="foot">Settings are saved on this device.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
