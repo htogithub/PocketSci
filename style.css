@@ -210,11 +210,11 @@
 
 /* The page never scrolls or bounces: only the history list and the
    settings panel can scroll, and only when their content is too long. */
-html, body {
+html {
   height: 100%;
-  overflow: hidden;
   overscroll-behavior: none;
 }
+body { overflow: hidden; }
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -224,16 +224,16 @@ html {
   --font-lcd: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-/* Sized from the top with the full screen height: in the installed iPhone
-   app, "100%" / "bottom: 0" stop short of the bottom by the height of the
-   status bar, which left an empty strip at the bottom. */
+/* --app-h is the real screen height, measured by script on the installed
+   iPhone app: there, iOS sizes 100%, 100vh and 100dvh without the status
+   bar, which left an empty strip at the bottom of the screen. */
 body {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
-  height: 100dvh;
+  height: var(--app-h, 100dvh);
   background: var(--page-bg);
   color: var(--ink);
   font-family: var(--font-ui);
@@ -263,7 +263,7 @@ button { font: inherit; color: inherit; }
   width: 100%;
   max-width: 480px;
   height: 100vh;
-  height: 100dvh;
+  height: var(--app-h, 100dvh);
   margin: 0 auto;
   padding:
     max(env(safe-area-inset-top), 8px)

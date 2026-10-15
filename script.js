@@ -1332,6 +1332,7 @@
     /* ----- Portrait lock: turn the calculator back when the phone is sideways ----- */
     const landscapePhone = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (pointer: coarse)');
     function updateOrientation() {
+      if (window.pocketSciAppHeight) window.pocketSciAppHeight();
       let angle = typeof window.orientation === 'number' ? window.orientation
         : (screen.orientation && typeof screen.orientation.angle === 'number' ? screen.orientation.angle : 90);
       angle = ((angle % 360) + 360) % 360;

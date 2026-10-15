@@ -34,10 +34,23 @@
       if (navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) {
         r.classList.add('standalone');
       }
+      (window.pocketSciAppHeight = function () {
+      /* Installed iPhone app only: iOS can report a viewport that is shorter
+         than the screen by the status bar height. Use the real screen height. */
+      var r = document.documentElement;
+      var portrait = window.innerHeight > window.innerWidth;
+      var fullWidth = Math.abs(screen.width - window.innerWidth) < 2;
+      r.style.removeProperty('--app-h');
+      var bodyH = document.body ? document.body.getBoundingClientRect().height : 0;
+      var measured = Math.min(window.innerHeight, r.clientHeight || window.innerHeight, bodyH || Infinity);
+      if (navigator.standalone === true && portrait && fullWidth && screen.height - measured > 1) {
+        r.style.setProperty('--app-h', screen.height + 'px');
+      }
+    })();
     })();
   </script>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="script.js?v=5" defer></script>
 </head>
 <body>
   <main class="calc" id="calc" aria-label="PocketSci scientific calculator">
