@@ -1359,6 +1359,22 @@
     setSheet(null);
     renderHistory();
     render();
+
+    /* ----- Launch screen: stays at least 0.8 s, then fades out once the
+       fonts are ready (or after 1.5 s at most) ----- */
+    const splash = $('splash');
+    if (splash) {
+      const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+      const timeout = new Promise((resolve) => setTimeout(resolve, 1500));
+      Promise.race([fontsReady, timeout]).then(() => {
+        const shown = Date.now() - (window.pocketSciStart || Date.now());
+        setTimeout(() => {
+          fit();
+          splash.classList.add('hide');
+          setTimeout(() => splash.remove(), 400);
+        }, Math.max(0, 800 - shown));
+      });
+    }
   }
 
   /* ================================================================

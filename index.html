@@ -19,6 +19,7 @@
   <script>
     /* Apply saved appearance before the first paint (no colour flash) */
     (function () {
+      window.pocketSciStart = Date.now();
       var r = document.documentElement, s = {};
       try { s = JSON.parse(localStorage.getItem('pocketsci.settings') || '{}'); } catch (e) {}
       var metas = { retro: '#2e3a33', dark: '#1b1c20', amoled: '#000000', base: '#15161a' };
@@ -49,10 +50,24 @@
     })();
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=5">
-  <script src="script.js?v=5" defer></script>
+  <link rel="stylesheet" href="style.css?v=7">
+  <script src="script.js?v=7" defer></script>
 </head>
 <body>
+  <!-- Launch screen: the logo is drawn with the colours of the saved theme -->
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash-logo">
+      <div class="sl-lcd"><span>3.14</span></div>
+      <div class="sl-keys">
+        <i class="sl-shift"></i><i class="sl-fn"></i><i class="sl-fn"></i><i class="sl-op"></i>
+        <i class="sl-fn"></i><i class="sl-num"></i><i class="sl-num"></i><i class="sl-op"></i>
+        <i class="sl-fn"></i><i class="sl-num"></i><i class="sl-num"></i><i class="sl-eq"></i>
+      </div>
+    </div>
+    <div class="splash-name">PocketSci</div>
+    <div class="splash-bar"><span></span></div>
+  </div>
+
   <main class="calc" id="calc" aria-label="PocketSci scientific calculator">
     <header class="top">
       <div class="top-left">
