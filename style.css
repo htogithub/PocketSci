@@ -208,7 +208,13 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { height: 100%; }
+/* The page never scrolls or bounces: only the history list and the
+   settings panel can scroll, and only when their content is too long. */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -219,7 +225,8 @@ html {
 }
 
 body {
-  min-height: 100%;
+  position: fixed;
+  inset: 0;
   background: var(--page-bg);
   color: var(--ink);
   font-family: var(--font-ui);
@@ -248,9 +255,7 @@ button { font: inherit; color: inherit; }
   flex-direction: column;
   width: 100%;
   max-width: 480px;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 560px;
+  height: 100%;
   margin: 0 auto;
   padding:
     max(env(safe-area-inset-top), 8px)
@@ -272,6 +277,8 @@ button { font: inherit; color: inherit; }
 }
 
 /* ================= Top bar ================= */
+
+.top, .lcd, .pad { touch-action: none; }
 
 .top {
   display: grid;
@@ -583,7 +590,7 @@ button { font: inherit; color: inherit; }
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   list-style: none;
   padding: 0 8px 10px;
 }
@@ -638,7 +645,7 @@ button { font: inherit; color: inherit; }
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   padding: 2px 16px 18px;
 }
 
@@ -765,6 +772,23 @@ button { font: inherit; color: inherit; }
   .hist-item button:hover { background: var(--tile-bg); }
   .key:hover::after { opacity: 0.45; }
   .key.pressed:hover::after { opacity: 1; }
+}
+
+/* ================= Short screens =================
+   Nothing scrolls any more, so very short screens get a tighter layout. */
+@media (max-height: 640px) {
+  :root:not(.rot-ccw):not(.rot-cw) .top { height: 40px; }
+  :root:not(.rot-ccw):not(.rot-cw) .lcd { margin: 4px 2px 8px; padding: 5px 10px 6px; }
+  :root:not(.rot-ccw):not(.rot-cw) .readout { height: 46px; font-size: min(12vw, 40px); }
+  :root:not(.rot-ccw):not(.rot-cw) .sec { height: 13px; line-height: 13px; font-size: 10.5px; }
+  :root:not(.rot-ccw):not(.rot-cw) .cell { padding-bottom: 4px; }
+  :root:not(.rot-ccw):not(.rot-cw) .key { border-radius: 8px; }
+  :root:not(.rot-ccw):not(.rot-cw) .k-num { font-size: 17px; }
+  :root:not(.rot-ccw):not(.rot-cw) .k-num[data-id="neg"] { font-size: 14px; }
+  :root:not(.rot-ccw):not(.rot-cw) .k-op { font-size: 21px; }
+  :root:not(.rot-ccw):not(.rot-cw) .k-fn,
+  :root:not(.rot-ccw):not(.rot-cw) .k-clear { font-size: 13px; }
+  :root:not(.rot-ccw):not(.rot-cw) .k-shift { font-size: 14px; }
 }
 
 /* ================= Portrait lock =================

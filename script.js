@@ -1321,8 +1321,12 @@
     document.addEventListener('gesturechange', stop, { passive: false });
     document.addEventListener('gestureend', stop, { passive: false });
     document.addEventListener('dblclick', stop, { passive: false });
+    // No scrolling or rubber-band bounce anywhere, except inside the history
+    // list / settings panel when their content is taller than the panel.
     document.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 1 || (typeof e.scale === 'number' && e.scale !== 1)) e.preventDefault();
+      if (e.touches.length > 1 || (typeof e.scale === 'number' && e.scale !== 1)) { e.preventDefault(); return; }
+      const box = e.target.closest ? e.target.closest('.hist-list, .sheet-body') : null;
+      if (!box || box.scrollHeight <= box.clientHeight) e.preventDefault();
     }, { passive: false });
 
     /* ----- Portrait lock: turn the calculator back when the phone is sideways ----- */
