@@ -959,6 +959,12 @@
     amoled: { meta: '#000000', accent: '#b69cff' },
     base: { meta: '#15161a', accent: '#147e91' },
   };
+  // Haptic strength: iPhone ticks (count and spacing in ms), Android vibration (ms)
+  const HAPTIC_LEVELS = {
+    light: { ticks: 1, gap: 0, vibrate: 10 },
+    strong: { ticks: 2, gap: 30, vibrate: 25 },
+    max: { ticks: 3, gap: 30, vibrate: 40 },
+  };
   const ACCENTS = [
     ['Mint', '#86cdb9'], ['Amber', '#f0a04b'], ['Coral', '#ff7a6b'], ['Rose', '#f472b6'],
     ['Lavender', '#b69cff'], ['Sky', '#5fb3f9'], ['Lime', '#a3d977'], ['Brass', '#d6b44f'],
@@ -995,17 +1001,19 @@
     const setClose = $('setClose');
     const accentsEl = $('accents');
     const hapticToggle = $('hapticToggle');
+    const strengthRow = $('hapticStrengthRow');
     const sheets = { history: $('history'), settings: $('settings') };
     const keyEls = {};
 
     /* ----- Settings ----- */
-    const settings = { theme: 'retro', accent: null, haptics: true };
+    const settings = { theme: 'retro', accent: null, haptics: true, hapticStrength: 'strong' };
     try {
       const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
       if (saved.theme === 'minimal') saved.theme = 'base'; // Minimal was replaced by Base
       if (THEMES[saved.theme]) settings.theme = saved.theme;
       if (typeof saved.accent === 'string' && /^#[0-9a-f]{6}$/i.test(saved.accent)) settings.accent = saved.accent.toLowerCase();
       if (typeof saved.haptics === 'boolean') settings.haptics = saved.haptics;
+      if (HAPTIC_LEVELS[saved.hapticStrength]) settings.hapticStrength = saved.hapticStrength;
     } catch (e) { /* private mode or blocked storage: use defaults */ }
 
     function saveSettings() {
@@ -1015,6 +1023,7 @@
           accent: settings.accent,
           accentInk: settings.accent ? inkFor(settings.accent) : null,
           haptics: settings.haptics,
+          hapticStrength: settings.hapticStrength,
         }));
       } catch (e) { /* not saved, still applied for this session */ }
     }
@@ -1071,6 +1080,10 @@
       custom.style.setProperty('--c', selected === 'custom' ? settings.accent : rainbow);
       if (selected === 'custom') customInput.value = settings.accent;
       hapticToggle.checked = settings.haptics;
+      strengthRow.classList.toggle('is-off', !settings.haptics);
+      strengthRow.querySelectorAll('[data-strength]').forEach((b) => {
+        b.setAttribute('aria-checked', String(b.dataset.strength === settings.hapticStrength));
+      });
     }
 
     document.querySelectorAll('.theme-opt').forEach((b) => {
@@ -1098,18 +1111,31 @@
     });
     hapticToggle.addEventListener('change', () => {
       settings.haptics = hapticToggle.checked;
+      applySettings();
       saveSettings();
+    });
+    strengthRow.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-strength]');
+      if (!b) return;
+      settings.hapticStrength = b.dataset.strength;
+      applySettings();
+      saveSettings();
+      haptic(); // let the user feel the new strength right away
     });
 
     /* ----- Haptics -----
      * Android and others: Vibration API.
      * iPhone (iOS 18+): Safari has no Vibration API, but toggling a native
      * switch control plays the system haptic, so a hidden one is clicked. */
+    /* iPhone cannot change the strength of its system tick, so a stronger
+       level plays several ticks back to back, which feels like a firmer tap.
+       Android gets a longer vibration instead. */
     let hapticLabel = null;
     function haptic() {
       if (!settings.haptics) return;
+      const level = HAPTIC_LEVELS[settings.hapticStrength] || HAPTIC_LEVELS.strong;
       if (typeof navigator.vibrate === 'function') {
-        try { navigator.vibrate(8); } catch (e) { /* ignored */ }
+        try { navigator.vibrate(level.vibrate); } catch (e) { /* ignored */ }
         return;
       }
       if (!hapticLabel) {
@@ -1124,6 +1150,9 @@
         document.body.appendChild(hapticLabel);
       }
       hapticLabel.click();
+      for (let i = 1; i < level.ticks; i++) {
+        setTimeout(() => hapticLabel.click(), i * level.gap);
+      }
     }
 
     /* ----- Keypad ----- */

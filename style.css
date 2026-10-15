@@ -765,6 +765,39 @@ button { font: inherit; color: inherit; }
 .toggle-sub { font-size: 13.5px; line-height: 1.35; color: var(--muted); }
 .toggle-row input { flex: none; accent-color: var(--accent); }
 
+.seg-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 10px 10px 10px 14px;
+  border-radius: 12px;
+  background: var(--tile-bg);
+  transition: opacity 0.15s;
+}
+.seg-row.is-off { opacity: 0.4; pointer-events: none; }
+.seg-title { flex: 1; font-size: 16px; font-weight: 600; }
+.seg {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--chip-bg);
+}
+.seg button {
+  min-width: 58px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); }
+
 .foot {
   margin-top: 16px;
   font-size: 13px;

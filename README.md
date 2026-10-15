@@ -55,7 +55,7 @@ Tap the sliders button next to History to open the settings:
 
 - **Theme**: Retro (sage display and brass keys), Dark, AMOLED (pure black, outlined keys) or Base (blue number keys, grey operation keys, white labels).
 - **Accent color**: the color of the second-function labels and, in Dark and AMOLED, of the 2nd key and the operation keys (in Retro, of the 2nd key only; in Base, the key colors stay fixed). Pick a preset, keep the theme's default, or choose any color with Custom.
-- **Haptic feedback**: a light tap on each key press. It uses the vibration API on Android; on iPhone it needs iOS 18 or later.
+- **Haptic feedback**: a tap on each key press, in three strengths (Light, Strong, Max). It uses the vibration API on Android; on iPhone it needs iOS 18 or later.
 
 ### Keyboard shortcuts
 
